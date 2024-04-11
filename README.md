@@ -66,8 +66,3 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 
 For any questions or inquiries, please contact me on Instagram @02yannek or Reddit u/02yannek_backup
 
----
-
-Feel free to customize the README file based on your specific project details, such as the Node.js and npm versions required, your contact information, and any additional sections you want to include.
-
-Remember to update the placeholders (e.g., `your-username`, `your-email@example.com`) with your actual information before publishing the README on your GitHub page.
