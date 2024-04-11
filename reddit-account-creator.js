@@ -1,4 +1,3 @@
-javascript
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const readline = require('readline');
