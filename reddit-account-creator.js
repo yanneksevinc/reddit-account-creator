@@ -2,9 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const readline = require('readline');
 const nodemailer = require('nodemailer');
-const HttpsProxyAgent = require('https-proxy-agent');
 const { TwoCaptcha } = require('2captcha');
-
 const solver = new TwoCaptcha('YOUR_2CAPTCHA_API_KEY');
 
 async function createRedditAccount(email, password, proxy) {
@@ -35,6 +33,7 @@ async function createRedditAccount(email, password, proxy) {
     await verifyAccount(email, password, proxy);
 
     console.log(`Account created successfully: ${email}`);
+    saveAccountToFile(email, password);
   } catch (error) {
     console.error(`Error creating account: ${email}`, error);
   } finally {
@@ -69,6 +68,8 @@ async function verifyAccount(email, password, proxy) {
 
 async function waitForVerificationEmail(transporter) {
   return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const maxAttempts = 6;
     const fetchInterval = setInterval(async () => {
       try {
         const messages = await transporter.getNewMail();
@@ -79,6 +80,11 @@ async function waitForVerificationEmail(transporter) {
             resolve(verificationLink);
             return;
           }
+        }
+        attempts++;
+        if (attempts >= maxAttempts) {
+          clearInterval(fetchInterval);
+          reject(new Error('Verification email not received within the specified attempts.'));
         }
       } catch (error) {
         console.error('Error fetching verification email:', error);
@@ -91,25 +97,47 @@ async function waitForVerificationEmail(transporter) {
 
 function extractVerificationLink(emailText) {
   // Extract the verification link from the email text using regex or string manipulation
-  // Return the extracted link
+  // Example implementation:
+  const regex = /https?:\/\/[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?/g;
+  const match = emailText.match(regex);
+  return match ? match[0] : null;
 }
 
 function generateUsername() {
   // Generate a random username
-  // Return the generated username
+  // Example implementation:
+  const adjectives = ['happy', 'silly', 'funny', 'crazy', 'cool'];
+  const nouns = ['puppy', 'kitten', 'panda', 'unicorn', 'dragon'];
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  const randomNumber = Math.floor(Math.random() * 1000);
+  return `${randomAdjective}${randomNoun}${randomNumber}`;
+}
+
+function saveAccountToFile(email, password) {
+  const data = `${email}:${password}\n`;
+  fs.appendFile('output.txt', data, (err) => {
+    if (err) {
+      console.error('Error saving account to file:', err);
+    }
+  });
 }
 
 async function main() {
   const emailsFile = 'emails.txt';
   const proxiesFile = 'proxies.txt';
 
-  const emails = await readFile(emailsFile);
-  const proxies = await readFile(proxiesFile);
+  try {
+    const emails = await readFile(emailsFile);
+    const proxies = await readFile(proxiesFile);
 
-  for (let i = 0; i < emails.length; i++) {
-    const [email, password] = emails[i].split(':');
-    const proxy = proxies[i % proxies.length];
-    await createRedditAccount(email, password, proxy);
+    for (let i = 0; i < emails.length; i++) {
+      const [email, password] = emails[i].split(':');
+      const proxy = proxies[i % proxies.length];
+      await createRedditAccount(email, password, proxy);
+    }
+  } catch (error) {
+    console.error('Error reading files:', error);
   }
 }
 
@@ -124,7 +152,6 @@ async function readFile(filePath) {
   for await (const line of rl) {
     lines.push(line);
   }
-
   return lines;
 }
 
