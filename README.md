@@ -64,5 +64,5 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 
 ## Contact
 
-For any questions or inquiries, please contact me on Instagram @02yannek or Reddit u/02yannek_backup
+For any questions or inquiries, please contact me on my email yannek(at)yanneksevinc.de
 
